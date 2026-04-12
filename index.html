@@ -243,7 +243,7 @@ async function loadUsers(){
   users=snap.docs.map(d=>({username:d.id,...d.data()}));
 }
 async function savePatient(p){
-  await setDoc(doc(db,'patients',p.id),{name:p.name,addr:p.addr,gps:p.gps,notes:p.notes,addedBy:p.addedBy||''});
+  await setDoc(doc(db,'patients',p.id),{name:p.name,addr:p.addr,gps:p.gps,notes:p.notes,addedBy:p.addedBy||'',createdAt:p.createdAt||''});
 }
 async function removePatient(id){await deleteDoc(doc(db,'patients',id));}
 async function saveUser(u){
@@ -302,7 +302,18 @@ window.doLogin=async function(){
   try{
     await loadUsers();
     const found=users.find(x=>x.username.toLowerCase().replace(/\s+/g,'')===u&&x.password===inputPass&&x.active===true);
-    if(found){hideLoader();currentUser=found;isAdmin=!!found.isAdmin;startApp();return;}
+    if(found){
+      hideLoader();currentUser=found;isAdmin=!!found.isAdmin;
+      // Guardar último login y contador
+      try{
+        await updateDoc(doc(db,'users',found.username),{
+          lastLogin:new Date().toLocaleString('es-ES'),
+          loginCount:(found.loginCount||0)+1
+        });
+        await loadUsers();
+      }catch(e){}
+      startApp();return;
+    }
     const blocked=users.find(x=>x.username.toLowerCase().replace(/\s+/g,'')===u&&x.active===false);
     hideLoader();
     document.getElementById('login-error').textContent=blocked?'Tu acceso ha sido desactivado.':'Nombre o PIN incorrectos.';
@@ -364,7 +375,7 @@ window.render=function render(){
         <div class="pname">${p.name}</div>
         ${p.addr?`<div class="paddress">${p.addr}</div>`:''}
         ${p.notes?`<div class="pnotes">${p.notes}</div>`:''}
-      </div>
+        ${p.createdAt?`<div style="font-size:10px;color:#bbb;margin-top:3px">${p.createdAt}${isAdmin&&p.addedBy?' · '+p.addedBy:''}</div>`:''}      </div>
       <div class="btns">
         <button class="btn-edit" onclick="openEdit('${p.id}')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -389,7 +400,7 @@ window.addP=async function(){
   if(!addr&&!gps){alert('Necesitas al menos una dirección o coordenadas GPS');return;}
   showLoader('Guardando...');
   try{
-    const p={id:Date.now()+'',name,addr,gps,notes,addedBy:currentUser.realname||currentUser.username};
+    const p={id:Date.now()+'',name,addr,gps,notes,addedBy:currentUser.realname||currentUser.username,createdAt:new Date().toLocaleDateString('es-ES')};
     await savePatient(p);await loadPatients();
     document.getElementById('n-nm').value='';document.getElementById('n-ad').value='';
     document.getElementById('n-gp').value='';document.getElementById('n-no').value='';
@@ -434,7 +445,8 @@ function renderUsers(){
       <div class="avatar purple">${initials(u.realname||u.username)}</div>
       <div class="user-info">
         <div class="user-name">${u.realname||u.username}</div>
-        <div class="user-meta">@${u.username} · ${u.active?'Activo':'Bloqueado'}${u.createdAt?' · '+u.createdAt:''}</div>
+        <div class="user-meta">@${u.username} · ${u.active?'Activo':'Bloqueado'}${u.createdAt?' · Alta: '+u.createdAt:''}</div>
+        ${u.lastLogin?`<div style="font-size:10px;color:#aaa;margin-top:2px">Último acceso: ${u.lastLogin} · ${u.loginCount||1} acceso${(u.loginCount||1)!==1?'s':''}</div>`:''}
       </div>
       <div class="btns">
         <button class="${u.active?'btn-block':'btn-unblock'}" onclick="toggleUser('${u.username}')">${u.active?'Bloquear':'Activar'}</button>
