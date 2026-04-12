@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Costa del Sol">
+<title>Costa del Sol</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+.app{max-width:500px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border-bottom:1px solid #e8e8e8;position:sticky;top:0;z-index:10}
+.logo{width:40px;height:40px;background:#E1F5EE;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.topbar-info{flex:1}
+.topbar h1{font-size:17px;font-weight:600;color:#1a1a1a}
+.topbar p{font-size:12px;color:#888}
+.btn-logout{background:transparent;border:none;color:#888;font-size:13px;cursor:pointer;padding:4px 8px}
+.content{flex:1;padding:16px}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;padding:8px 12px;border-radius:10px;margin-bottom:14px}
+.status.ok{background:#E1F5EE;color:#085041}
+.status.err{background:#FCEBEB;color:#791F1F}
+.status.load{background:#f5f5f5;color:#666}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.ok{background:#1D9E75}.dot.err{background:#E24B4A}.dot.load{background:#aaa}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab{flex:1;padding:10px 6px;font-size:12px;font-weight:500;border:1px solid #e0e0e0;border-radius:10px;background:#f5f5f5;color:#666;cursor:pointer;text-align:center}
+.tab.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.tab.admin-tab.active{background:#534AB7;border-color:#534AB7}
+.search-wrap{position:relative;margin-bottom:8px;display:flex;gap:8px}
+.search-wrap input{flex:1;padding:12px 14px 12px 42px;font-size:16px;border:1px solid #ddd;border-radius:12px;background:#fff;color:#1a1a1a;outline:none;-webkit-appearance:none}
+.search-wrap input:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#aaa}
+.mic-btn{width:46px;height:46px;border-radius:12px;border:1px solid #e0e0e0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.mic-btn.listening{background:#FCEBEB;border-color:#F7C1C1;animation:pulse 1s infinite}
+.mic-btn.listening svg{stroke:#E24B4A}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.voice-status{font-size:12px;color:#E24B4A;margin-bottom:8px;min-height:18px;text-align:center;font-weight:500}
+.count{font-size:12px;color:#888;margin-bottom:10px}
+.list{display:flex;flex-direction:column;gap:8px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#085041;flex-shrink:0}
+.avatar.purple{background:#EEEDFE;color:#3C3489}
+.info{flex:1;min-width:0}
+.pname{font-size:15px;font-weight:600;color:#1a1a1a}
+.paddress{font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.pnotes{font-size:11px;color:#0F6E56;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btns{display:flex;gap:6px;flex-shrink:0}
+.btn-edit{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:9px;padding:8px;cursor:pointer;display:flex;align-items:center}
+.btn-del{background:#FCEBEB;border:1px solid #F7C1C1;border-radius:9px;padding:8px;cursor:pointer;display:flex;align-items:center}
+.btn-nav{background:#1D9E75;border:none;border-radius:9px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;color:#fff;font-size:12px;font-weight:600}
+.btn-nav:active{opacity:0.8}
+.btn-block{background:#FCEBEB;border:1px solid #F7C1C1;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:12px;color:#A32D2D;font-weight:500}
+.btn-unblock{background:#E1F5EE;border:1px solid #9FE1CB;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:12px;color:#085041;font-weight:500}
+.empty{text-align:center;padding:3rem 1rem;color:#aaa;font-size:14px}
+.form{display:flex;flex-direction:column;gap:14px}
+.flabel{font-size:13px;color:#555;margin-bottom:5px;font-weight:500}
+.form input,.form textarea,.form select{width:100%;padding:12px 14px;font-size:15px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#1a1a1a;outline:none;font-family:inherit;-webkit-appearance:none}
+.form input:focus,.form textarea:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
+.form textarea{resize:vertical;min-height:70px}
+.hint{font-size:11px;color:#aaa;margin-top:4px;line-height:1.5}
+.btn-primary{background:#1D9E75;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:4px}
+.btn-primary:active{opacity:0.85}
+.btn-purple{background:#534AB7;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:4px}
+.btn-secondary{background:#f5f5f5;color:#555;border:1px solid #e0e0e0;border-radius:12px;padding:13px;font-size:15px;cursor:pointer;width:100%;margin-top:8px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.sheet{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.sheet h3{font-size:18px;font-weight:600;margin-bottom:16px}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:15px;color:#555}
+.loading-overlay.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid #e0e0e0;border-top-color:#1D9E75;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gps-preview{font-size:11px;color:#0F6E56;margin-top:4px;min-height:16px}
+.login-screen{max-width:400px;margin:0 auto;padding:40px 20px}
+.login-screen h1{font-size:24px;font-weight:700;margin-bottom:6px}
+.login-screen p{font-size:14px;color:#888;margin-bottom:30px}
+.login-logo{width:64px;height:64px;background:#E1F5EE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.section-title{font-size:14px;font-weight:600;color:#555;margin-bottom:10px;margin-top:4px}
+.user-card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.user-card.blocked{opacity:0.6;background:#f9f9f9}
+.user-info{flex:1}
+.user-name{font-size:14px;font-weight:600;color:#1a1a1a}
+.user-meta{font-size:11px;color:#888;margin-top:2px}
+.divider{height:1px;background:#f0f0f0;margin:16px 0}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="spinner"></div>
+  <span id="loader-text">Cargando...</span>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen" style="display:none">
+  <div class="login-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" width="32" height="32"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+  </div>
+  <h1>Costa del Sol</h1>
+  <p>Costa del Sol — Acceso privado</p>
+  <div class="form">
+    <div>
+      <div class="flabel">Usuario</div>
+      <input type="text" id="login-user" placeholder="Tu nombre" autocomplete="off" autocapitalize="off" />
+    </div>
+    <div>
+      <div class="flabel">Contraseña</div>
+      <input type="password" id="login-pass" placeholder="PIN de 4 dígitos" maxlength="4" inputmode="numeric" pattern="[0-9]*" />
+    </div>
+    <div id="login-error" style="font-size:13px;color:#E24B4A;min-height:18px;text-align:center"></div>
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+  </div>
+  <p style="font-size:11px;color:#bbb;text-align:center;margin-top:20px">Acceso solo para personal autorizado</p>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div class="app" id="main-app" style="display:none">
+  <div class="topbar">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" width="22" height="22"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    </div>
+    <div class="topbar-info">
+      <h1>Costa del Sol</h1>
+      <p>Direcciones verificadas por el equipo</p>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
+  </div>
+
+  <div class="content">
+    <div id="status-bar" class="status load">
+      <div class="dot load" id="s-dot"></div>
+      <span id="s-text">Conectando...</span>
+    </div>
+
+    <div class="tabs" id="tabs-bar">
+      <div class="tab active" id="tab-b" onclick="setTab('b')">Buscar</div>
+      <div class="tab" id="tab-a" onclick="setTab('a')">Añadir</div>
+      <div class="tab admin-tab" id="tab-admin" onclick="setTab('admin')" style="display:none">Admin</div>
+    </div>
+
+    <!-- BUSCAR -->
+    <div id="pane-b">
+      <div class="search-wrap">
+        <span class="search-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+        <input type="search" id="q" placeholder="Nombre..." oninput="render()" autocomplete="off" />
+        <button class="mic-btn" id="refresh-btn" onclick="refreshList()" title="Actualizar lista">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+        <button class="mic-btn" id="mic-btn" onclick="toggleVoice()" title="Buscar por voz">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        </button>
+      </div>
+      <div class="voice-status" id="voice-status"></div>
+      <div class="count" id="cnt"></div>
+      <div class="list" id="lst"></div>
+    </div>
+
+    <!-- AÑADIR -->
+    <div id="pane-a" style="display:none">
+      <div class="form">
+        <div><div class="flabel">Nombre completo *</div><input type="text" id="n-nm" placeholder="Ej: María García López" /></div>
+        <div><div class="flabel">Dirección</div><input type="text" id="n-ad" placeholder="Ej: Urb. Las Palmeras, chalet 12, Estepona" /></div>
+        <div>
+          <div class="flabel">Coordenadas GPS</div>
+          <input type="text" id="n-gp" placeholder="Ej: 36.4271, -5.1480" oninput="previewGPS('n-gp','gps-preview')" />
+          <div class="gps-preview" id="gps-preview"></div>
+          <div class="hint">Mantén pulsado en Google Maps sobre la puerta exacta → copia los números.</div>
+        </div>
+        <div><div class="flabel">Notas para el conductor</div><textarea id="n-no" placeholder="Ej: Timbre roto, llamar al 600... Verja azul."></textarea></div>
+        <button class="btn-primary" onclick="addP()">Guardar paciente</button>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="pane-admin" style="display:none">
+      <div class="section-title">Usuarios con acceso</div>
+      <div id="users-list"></div>
+      <div class="divider"></div>
+      <div class="section-title">Crear nuevo usuario</div>
+      <div class="form">
+        <div><div class="flabel">Nombre</div><input type="text" id="new-uname" placeholder="Ej: Antonio Ruiz" autocapitalize="words" /></div>
+        <div><div class="flabel">PIN de 4 dígitos</div><input type="text" id="new-upass" placeholder="Ej: 1234" maxlength="4" inputmode="numeric" /></div>
+        <button class="btn-purple" onclick="createUser()">Crear usuario</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="overlay" id="edit-overlay">
+  <div class="sheet">
+    <h3>Editar paciente</h3>
+    <div class="form">
+      <div><div class="flabel">Nombre</div><input type="text" id="e-nm" /></div>
+      <div><div class="flabel">Dirección</div><input type="text" id="e-ad" /></div>
+      <div>
+        <div class="flabel">Coordenadas GPS</div>
+        <input type="text" id="e-gp" oninput="previewGPS('e-gp','gps-preview-edit')" />
+        <div class="gps-preview" id="gps-preview-edit"></div>
+      </div>
+      <div><div class="flabel">Notas</div><textarea id="e-no"></textarea></div>
+      <button class="btn-primary" onclick="saveEdit()">Guardar cambios</button>
+      <button class="btn-secondary" onclick="closeEdit()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────
+const BIN_URL = 'https://api.jsonbin.io/v3/b/69da64b636566621a8a128fd';
+const API_KEY = '$2a$10$zlLQKYwtltX0OaCTpCy2KuiVGVQ.bI1PVIiU7vjUk4sUOkKCERk.2';
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = '2009';
+// ─────────────────────────────────────────────────────────────
+
+let patients = [];
+let users = [];
+let editPatientId = null;
+let currentUser = null;
+let isAdmin = false;
+let recognition = null;
+let listening = false;
+
+// ─── UI HELPERS ──────────────────────────────────────────────
+function showLoader(t) {
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('loader-text').textContent = t || 'Cargando...';
+}
+function hideLoader() {
+  document.getElementById('loader').classList.remove('show');
+}
+function setStatus(type, text) {
+  const b = document.getElementById('status-bar');
+  b.className = 'status ' + type;
+  document.getElementById('s-dot').className = 'dot ' + type;
+  document.getElementById('s-text').textContent = text;
+}
+function initials(n) {
+  return (n || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+}
+
+// ─── API JSONBIN ──────────────────────────────────────────────
+async function fetchData() {
+  const r = await fetch(BIN_URL + '/latest', {
+    headers: { 'X-Master-Key': API_KEY }
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  return d.record;
+}
+
+async function saveData(data) {
+  const r = await fetch(BIN_URL, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// ─── GPS ──────────────────────────────────────────────────────
+function parseGPS(raw) {
+  if (!raw || !raw.trim()) return null;
+  let s = raw.trim();
+  // Formato DMS
+  const dms = s.match(/(\d+)[°º]\s*(\d+)[''']\s*(\d+\.?\d*)["""°]?\s*([NSns])[,\s]+(\d+)[°º]\s*(\d+)[''']\s*(\d+\.?\d*)["""°]?\s*([EWew])/);
+  if (dms) {
+    let lat = parseInt(dms[1]) + parseInt(dms[2]) / 60 + parseFloat(dms[3]) / 3600;
+    let lng = parseInt(dms[5]) + parseInt(dms[6]) / 60 + parseFloat(dms[7]) / 3600;
+    if (/[Ss]/.test(dms[4])) lat = -lat;
+    if (/[Ww]/.test(dms[8])) lng = -lng;
+    return { lat, lng };
+  }
+  // Reemplazar comas decimales por puntos
+  s = s.replace(/(\d),(\d)/g, '$1.$2');
+  // Formato decimal simple: "36.4271, -5.1480"
+  const dec = s.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if (dec) return { lat: parseFloat(dec[1]), lng: parseFloat(dec[2]) };
+  return null;
+}
+
+function previewGPS(inputId, previewId) {
+  const raw = document.getElementById(inputId).value;
+  const p = parseGPS(raw);
+  const el = document.getElementById(previewId);
+  if (p) el.textContent = 'Coordenadas OK: ' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);
+  else el.textContent = raw.trim() ? 'Formato no reconocido' : '';
+}
+
+function navigate(patientId) {
+  const p = patients.find(x => x.id === patientId);
+  if (!p) return;
+  const coords = parseGPS(p.gps);
+  let url;
+  if (coords) {
+    url = 'https://www.google.com/maps/dir/?api=1&destination=' + coords.lat + ',' + coords.lng + '&travelmode=driving';
+  } else if (p.addr && p.addr.trim()) {
+    url = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.addr) + '&travelmode=driving';
+  } else {
+    alert('Este paciente no tiene dirección ni coordenadas.');
+    return;
+  }
+  window.open(url, '_blank');
+}
+
+// ─── VOZ ─────────────────────────────────────────────────────
+function toggleVoice() {
+  if (listening) { stopVoice(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Tu navegador no soporta búsqueda por voz. Usa Chrome.'); return; }
+  recognition = new SR();
+  recognition.lang = 'es-ES';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.onstart = () => {
+    listening = true;
+    document.getElementById('mic-btn').classList.add('listening');
+    document.getElementById('voice-status').textContent = 'Escuchando...';
+  };
+  recognition.onresult = (e) => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    document.getElementById('q').value = t;
+    render();
+    if (e.results[0].isFinal) { stopVoice(); }
+  };
+  recognition.onerror = () => { stopVoice(); };
+  recognition.onend = () => { stopVoice(); };
+  recognition.start();
+}
+function stopVoice() {
+  listening = false;
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('voice-status').textContent = '';
+  if (recognition) { try { recognition.stop(); } catch (e) {} }
+}
+
+// ─── LOGIN / LOGOUT ───────────────────────────────────────────
+async function doLogin() {
+  const inputUser = document.getElementById('login-user').value.trim();
+  const inputPass = document.getElementById('login-pass').value.trim();
+  document.getElementById('login-error').textContent = '';
+
+  if (!inputUser || !inputPass) {
+    document.getElementById('login-error').textContent = 'Introduce nombre y PIN.';
+    return;
+  }
+
+  // Normalizar: minúsculas sin espacios
+  const u = inputUser.toLowerCase().replace(/\s+/g, '');
+
+  // Comprobar admin hardcoded
+  if (u === ADMIN_USER && inputPass === ADMIN_PASS) {
+    currentUser = { username: ADMIN_USER, realname: 'Administrador', isAdmin: true };
+    isAdmin = true;
+    startApp();
+    return;
+  }
+
+  showLoader('Verificando...');
+  try {
+    const data = await fetchData();
+    users = data.users || [];
+    patients = data.patients || [];
+
+    // Buscar usuario normalizando también el username guardado
+    const found = users.find(x =>
+      x.username.toLowerCase().replace(/\s+/g, '') === u &&
+      x.password === inputPass &&
+      x.active === true
+    );
+
+    if (found) {
+      hideLoader();
+      currentUser = found;
+      isAdmin = !!found.isAdmin;
+      startApp();
+      return;
+    }
+
+    const blocked = users.find(x =>
+      x.username.toLowerCase().replace(/\s+/g, '') === u &&
+      x.active === false
+    );
+
+    hideLoader();
+    if (blocked) {
+      document.getElementById('login-error').textContent = 'Tu acceso ha sido desactivado.';
+    } else {
+      document.getElementById('login-error').textContent = 'Nombre o PIN incorrectos.';
+    }
+  } catch (e) {
+    hideLoader();
+    document.getElementById('login-error').textContent = 'Error de conexión. Inténtalo de nuevo.';
+  }
+}
+
+// Enter en PIN para login
+document.getElementById('login-pass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'flex';
+  if (isAdmin) document.getElementById('tab-admin').style.display = '';
+  loadAll();
+}
+
+function doLogout() {
+  currentUser = null;
+  isAdmin = false;
+  patients = [];
+  users = [];
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'block';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('tab-admin').style.display = 'none';
+  setTab('b');
+}
+
+// ─── CARGAR DATOS ─────────────────────────────────────────────
+async function loadAll() {
+  setStatus('load', 'Cargando...');
+  try {
+    const data = await fetchData();
+    patients = data.patients || [];
+    users = data.users || [];
+    patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    setStatus('ok', patients.length + '');
+    render();
+    if (isAdmin) renderUsers();
+  } catch (e) {
+    setStatus('err', 'Error de conexión.');
+  }
+}
+
+// ─── TABS ─────────────────────────────────────────────────────
+function setTab(t) {
+  ['b', 'a', 'admin'].forEach(x => {
+    const tab = document.getElementById('tab-' + x);
+    const pane = document.getElementById('pane-' + x);
+    if (tab) tab.classList.toggle('active', t === x);
+    if (pane) pane.style.display = t === x ? '' : 'none';
+  });
+  if (t === 'admin') renderUsers();
+}
+
+// ─── RENDER PACIENTES ─────────────────────────────────────────
+function render() {
+  const q = (document.getElementById('q').value || '').toLowerCase().trim();
+  const filtered = q
+    ? patients.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        (p.addr && p.addr.toLowerCase().includes(q)) ||
+        (p.notes && p.notes.toLowerCase().includes(q))
+      )
+    : patients;
+
+  document.getElementById('cnt').textContent = filtered.length;
+  const lst = document.getElementById('lst');
+
+  if (!filtered.length) {
+    lst.innerHTML = '<div class="empty">' + (q ? 'No se encontró ningún paciente' : 'Aún no hay pacientes. Pulsa "Añadir".') + '</div>';
+    return;
+  }
+
+  lst.innerHTML = filtered.map(p => `
+    <div class="card">
+      <div class="avatar">${initials(p.name)}</div>
+      <div class="info">
+        <div class="pname">${p.name}</div>
+        ${p.addr ? `<div class="paddress">${p.addr}</div>` : ''}
+        ${p.notes ? `<div class="pnotes">${p.notes}</div>` : ''}
+      </div>
+      <div class="btns">
+        <button class="btn-edit" onclick="openEdit('${p.id}')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-del" onclick="deleteP('${p.id}')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+        <button class="btn-nav" onclick="navigate('${p.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L3 21l9-4 9 4L12 2z"/></svg>
+          Ir
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── AÑADIR PACIENTE ──────────────────────────────────────────
+async function addP() {
+  const name = document.getElementById('n-nm').value.trim();
+  const addr = document.getElementById('n-ad').value.trim();
+  const gps = document.getElementById('n-gp').value.trim();
+  const notes = document.getElementById('n-no').value.trim();
+
+  if (!name) { alert('El nombre es obligatorio'); return; }
+  if (!addr && !gps) { alert('Necesitas al menos una dirección o coordenadas GPS'); return; }
+
+  showLoader('Guardando...');
+  try {
+    const data = await fetchData();
+    data.patients = data.patients || [];
+    data.patients.push({
+      id: Date.now() + '',
+      name, addr, gps, notes,
+      addedBy: currentUser.realname || currentUser.username
+    });
+    data.patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    await saveData(data);
+    patients = data.patients;
+    document.getElementById('n-nm').value = '';
+    document.getElementById('n-ad').value = '';
+    document.getElementById('n-gp').value = '';
+    document.getElementById('n-no').value = '';
+    document.getElementById('gps-preview').textContent = '';
+    setStatus('ok', patients.length + '');
+    setTab('b');
+    document.getElementById('q').value = name;
+    render();
+  } catch (e) {
+    alert('Error al guardar. Inténtalo de nuevo.');
+  }
+  hideLoader();
+}
+
+// ─── EDITAR PACIENTE ──────────────────────────────────────────
+function openEdit(patientId) {
+  const p = patients.find(x => x.id === patientId);
+  if (!p) return;
+  editPatientId = patientId;
+  document.getElementById('e-nm').value = p.name;
+  document.getElementById('e-ad').value = p.addr || '';
+  document.getElementById('e-gp').value = p.gps || '';
+  document.getElementById('e-no').value = p.notes || '';
+  document.getElementById('gps-preview-edit').textContent = '';
+  document.getElementById('edit-overlay').classList.add('open');
+}
+
+async function saveEdit() {
+  if (!editPatientId) return;
+  showLoader('Guardando...');
+  try {
+    const data = await fetchData();
+    const p = data.patients.find(x => x.id === editPatientId);
+    if (p) {
+      p.name = document.getElementById('e-nm').value.trim();
+      p.addr = document.getElementById('e-ad').value.trim();
+      p.gps = document.getElementById('e-gp').value.trim();
+      p.notes = document.getElementById('e-no').value.trim();
+    }
+    data.patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    await saveData(data);
+    patients = data.patients;
+    closeEdit();
+    render();
+  } catch (e) {
+    alert('Error al guardar. Inténtalo de nuevo.');
+  }
+  hideLoader();
+}
+
+function closeEdit() {
+  document.getElementById('edit-overlay').classList.remove('open');
+  editPatientId = null;
+}
+
+// ─── ELIMINAR PACIENTE ────────────────────────────────────────
+async function deleteP(patientId) {
+  if (!confirm('¿Eliminar este paciente?')) return;
+  showLoader('Eliminando...');
+  try {
+    const data = await fetchData();
+    data.patients = data.patients.filter(x => x.id !== patientId);
+    await saveData(data);
+    patients = data.patients;
+    setStatus('ok', patients.length + '');
+    render();
+  } catch (e) {
+    alert('Error al eliminar. Inténtalo de nuevo.');
+  }
+  hideLoader();
+}
+
+// ─── USUARIOS (ADMIN) ─────────────────────────────────────────
+function renderUsers() {
+  const lst = document.getElementById('users-list');
+  if (!users.length) {
+    lst.innerHTML = '<div class="empty">No hay usuarios creados aún</div>';
+    return;
+  }
+  lst.innerHTML = users.map(u => `
+    <div class="user-card ${u.active ? '' : 'blocked'}">
+      <div class="avatar purple">${initials(u.realname || u.username)}</div>
+      <div class="user-info">
+        <div class="user-name">${u.realname || u.username}</div>
+        <div class="user-meta">@${u.username} · ${u.active ? 'Activo' : 'Bloqueado'}${u.createdAt ? ' · ' + u.createdAt : ''}</div>
+      </div>
+      <div class="btns">
+        <button class="${u.active ? 'btn-block' : 'btn-unblock'}" onclick="toggleUser('${u.username}')">${u.active ? 'Bloquear' : 'Activar'}</button>
+        <button class="btn-del" onclick="deleteUser('${u.username}')" title="Eliminar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function createUser() {
+  const realname = document.getElementById('new-uname').value.trim();
+  const password = document.getElementById('new-upass').value.trim();
+
+  if (!realname || !password) { alert('Rellena el nombre y el PIN'); return; }
+  if (!/^\d{4}$/.test(password)) { alert('El PIN debe ser exactamente 4 dígitos'); return; }
+
+  const username = realname.toLowerCase().replace(/\s+/g, '');
+
+  showLoader('Creando usuario...');
+  try {
+    const data = await fetchData();
+    data.users = data.users || [];
+
+    if (data.users.find(u => u.username === username)) {
+      hideLoader();
+      alert('Ya existe un usuario con ese nombre');
+      return;
+    }
+
+    data.users.push({
+      username,
+      password,
+      realname,
+      isAdmin: false,
+      active: true,
+      createdAt: new Date().toLocaleDateString('es-ES')
+    });
+
+    await saveData(data);
+    users = data.users;
+    document.getElementById('new-uname').value = '';
+    document.getElementById('new-upass').value = '';
+    renderUsers();
+    alert('Usuario "' + realname + '" creado correctamente');
+  } catch (e) {
+    alert('Error al crear usuario. Inténtalo de nuevo.');
+  }
+  hideLoader();
+}
+
+async function toggleUser(username) {
+  showLoader('Actualizando...');
+  try {
+    const data = await fetchData();
+    data.users = data.users || [];
+    const u = data.users.find(x => x.username === username);
+    if (!u) { hideLoader(); alert('Usuario no encontrado.'); return; }
+    u.active = !u.active;
+    await saveData(data);
+    users = data.users;
+    renderUsers();
+  } catch (e) {
+    alert('Error al actualizar. Inténtalo de nuevo.');
+  }
+  hideLoader();
+}
+
+async function deleteUser(username) {
+  if (!confirm('¿Eliminar este usuario? No podrá volver a entrar.')) return;
+  showLoader('Eliminando...');
+  try {
+    const data = await fetchData();
+    data.users = (data.users || []).filter(x => x.username !== username);
+    await saveData(data);
+    users = data.users;
+    renderUsers();
+  } catch (e) {
+    alert('Error al eliminar. Inténtalo de nuevo.');
+  }
+  hideLoader();
+}
+
+async function refreshList() {
+  const btn = document.getElementById('refresh-btn');
+  btn.style.animation = 'spin 0.7s linear infinite';
+  try {
+    const data = await fetchData();
+    patients = data.patients || [];
+    users = data.users || [];
+    patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    setStatus('ok', patients.length + '');
+    render();
+  } catch (e) {
+    setStatus('err', 'Error de conexión.');
+  }
+  btn.style.animation = '';
+}
+
+
+async function init() {
+  showLoader('Iniciando...');
+  try {
+    // Verificar que la conexión funciona antes de mostrar login
+    await fetchData();
+  } catch (e) {
+    // Si falla, mostramos login igualmente — el error se verá al intentar entrar
+  }
+  hideLoader();
+  document.getElementById('login-screen').style.display = 'block';
+}
+
+init();
+</script>
+</body>
+</html>
