@@ -35,6 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .mic-btn.listening{background:#FCEBEB;border-color:#F7C1C1;animation:pulse 1s infinite}
 .mic-btn.listening svg{stroke:#E24B4A}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .voice-status{font-size:12px;color:#E24B4A;margin-bottom:8px;min-height:18px;text-align:center;font-weight:500}
 .count{font-size:12px;color:#888;margin-bottom:10px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -55,7 +56,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .empty{text-align:center;padding:3rem 1rem;color:#aaa;font-size:14px}
 .form{display:flex;flex-direction:column;gap:14px}
 .flabel{font-size:13px;color:#555;margin-bottom:5px;font-weight:500}
-.form input,.form textarea,.form select{width:100%;padding:12px 14px;font-size:15px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#1a1a1a;outline:none;font-family:inherit;-webkit-appearance:none}
+.form input,.form textarea{width:100%;padding:12px 14px;font-size:15px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#1a1a1a;outline:none;font-family:inherit;-webkit-appearance:none}
 .form input:focus,.form textarea:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,0.1)}
 .form textarea{resize:vertical;min-height:70px}
 .hint{font-size:11px;color:#aaa;margin-top:4px;line-height:1.5}
@@ -70,7 +71,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:15px;color:#555}
 .loading-overlay.show{display:flex}
 .spinner{width:36px;height:36px;border:3px solid #e0e0e0;border-top-color:#1D9E75;border-radius:50%;animation:spin 0.7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .gps-preview{font-size:11px;color:#0F6E56;margin-top:4px;min-height:16px}
 .login-screen{max-width:400px;margin:0 auto;padding:40px 20px}
 .login-screen h1{font-size:24px;font-weight:700;margin-bottom:6px}
@@ -98,7 +98,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" width="32" height="32"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
   </div>
   <h1>Costa del Sol</h1>
-  <p>Costa del Sol — Acceso privado</p>
+  <p>Acceso privado</p>
   <div class="form">
     <div>
       <div class="flabel">Usuario</div>
@@ -114,7 +114,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <p style="font-size:11px;color:#bbb;text-align:center;margin-top:20px">Acceso solo para personal autorizado</p>
 </div>
 
-<!-- APP PRINCIPAL -->
+<!-- APP -->
 <div class="app" id="main-app" style="display:none">
   <div class="topbar">
     <div class="logo">
@@ -133,7 +133,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span id="s-text">Conectando...</span>
     </div>
 
-    <div class="tabs" id="tabs-bar">
+    <div class="tabs">
       <div class="tab active" id="tab-b" onclick="setTab('b')">Buscar</div>
       <div class="tab" id="tab-a" onclick="setTab('a')">Añadir</div>
       <div class="tab admin-tab" id="tab-admin" onclick="setTab('admin')" style="display:none">Admin</div>
@@ -144,7 +144,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="search-wrap">
         <span class="search-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
         <input type="search" id="q" placeholder="Nombre..." oninput="render()" autocomplete="off" />
-        <button class="mic-btn" id="refresh-btn" onclick="refreshList()" title="Actualizar lista">
+        <button class="mic-btn" id="refresh-btn" onclick="refreshList()" title="Actualizar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </button>
         <button class="mic-btn" id="mic-btn" onclick="toggleVoice()" title="Buscar por voz">
@@ -168,7 +168,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="hint">Mantén pulsado en Google Maps sobre la puerta exacta → copia los números.</div>
         </div>
         <div><div class="flabel">Notas para el conductor</div><textarea id="n-no" placeholder="Ej: Timbre roto, llamar al 600... Verja azul."></textarea></div>
-        <button class="btn-primary" onclick="addP()">Guardar paciente</button>
+        <button class="btn-primary" onclick="addP()">Guardar</button>
       </div>
     </div>
 
@@ -190,7 +190,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <!-- MODAL EDITAR -->
 <div class="overlay" id="edit-overlay">
   <div class="sheet">
-    <h3>Editar paciente</h3>
+    <h3>Editar</h3>
     <div class="form">
       <div><div class="flabel">Nombre</div><input type="text" id="e-nm" /></div>
       <div><div class="flabel">Dirección</div><input type="text" id="e-ad" /></div>
@@ -206,275 +206,164 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
-<script>
-// ─── CONFIGURACIÓN ───────────────────────────────────────────
-const BIN_URL = 'https://api.jsonbin.io/v3/b/69da64b636566621a8a128fd';
-const API_KEY = '$2a$10$zlLQKYwtltX0OaCTpCy2KuiVGVQ.bI1PVIiU7vjUk4sUOkKCERk.2';
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDlM6PxoN1TG9jF1xIaEoLzK3hU_6Bgpy4",
+  authDomain: "costa-de-sol.firebaseapp.com",
+  projectId: "costa-de-sol",
+  storageBucket: "costa-de-sol.firebasestorage.app",
+  messagingSenderId: "429283351726",
+  appId: "1:429283351726:web:25f54dcc258826257be13f"
+};
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = '2009';
-// ─────────────────────────────────────────────────────────────
 
-let patients = [];
-let users = [];
-let editPatientId = null;
-let currentUser = null;
-let isAdmin = false;
-let recognition = null;
-let listening = false;
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
 
-// ─── UI HELPERS ──────────────────────────────────────────────
-function showLoader(t) {
-  document.getElementById('loader').classList.add('show');
-  document.getElementById('loader-text').textContent = t || 'Cargando...';
-}
-function hideLoader() {
-  document.getElementById('loader').classList.remove('show');
-}
-function setStatus(type, text) {
-  const b = document.getElementById('status-bar');
-  b.className = 'status ' + type;
-  document.getElementById('s-dot').className = 'dot ' + type;
-  document.getElementById('s-text').textContent = text;
-}
-function initials(n) {
-  return (n || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
-}
+let patients = [], users = [], editPatientId = null;
+let currentUser = null, isAdmin = false;
+let recognition = null, listening = false;
 
-// ─── API JSONBIN ──────────────────────────────────────────────
-async function fetchData() {
-  const r = await fetch(BIN_URL + '/latest', {
-    headers: { 'X-Master-Key': API_KEY }
-  });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const d = await r.json();
-  return d.record;
-}
+function showLoader(t){document.getElementById('loader').classList.add('show');document.getElementById('loader-text').textContent=t||'Cargando...';}
+function hideLoader(){document.getElementById('loader').classList.remove('show');}
+function setStatus(type,text){const b=document.getElementById('status-bar');b.className='status '+type;document.getElementById('s-dot').className='dot '+type;document.getElementById('s-text').textContent=text;}
+function initials(n){return(n||'').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
 
-async function saveData(data) {
-  const r = await fetch(BIN_URL, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-    body: JSON.stringify(data)
-  });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
+async function loadPatients(){
+  const snap=await getDocs(collection(db,'patients'));
+  patients=snap.docs.map(d=>({id:d.id,...d.data()}));
+  patients.sort((a,b)=>a.name.localeCompare(b.name,'es'));
 }
+async function loadUsers(){
+  const snap=await getDocs(collection(db,'users'));
+  users=snap.docs.map(d=>({username:d.id,...d.data()}));
+}
+async function savePatient(p){
+  await setDoc(doc(db,'patients',p.id),{name:p.name,addr:p.addr,gps:p.gps,notes:p.notes,addedBy:p.addedBy||''});
+}
+async function removePatient(id){await deleteDoc(doc(db,'patients',id));}
+async function saveUser(u){
+  await setDoc(doc(db,'users',u.username),{password:u.password,realname:u.realname,isAdmin:u.isAdmin||false,active:u.active,createdAt:u.createdAt||''});
+}
+async function removeUser(username){await deleteDoc(doc(db,'users',username));}
 
-// ─── GPS ──────────────────────────────────────────────────────
-function parseGPS(raw) {
-  if (!raw || !raw.trim()) return null;
-  let s = raw.trim();
-  // Formato DMS
-  const dms = s.match(/(\d+)[°º]\s*(\d+)[''']\s*(\d+\.?\d*)["""°]?\s*([NSns])[,\s]+(\d+)[°º]\s*(\d+)[''']\s*(\d+\.?\d*)["""°]?\s*([EWew])/);
-  if (dms) {
-    let lat = parseInt(dms[1]) + parseInt(dms[2]) / 60 + parseFloat(dms[3]) / 3600;
-    let lng = parseInt(dms[5]) + parseInt(dms[6]) / 60 + parseFloat(dms[7]) / 3600;
-    if (/[Ss]/.test(dms[4])) lat = -lat;
-    if (/[Ww]/.test(dms[8])) lng = -lng;
-    return { lat, lng };
-  }
-  // Reemplazar comas decimales por puntos
-  s = s.replace(/(\d),(\d)/g, '$1.$2');
-  // Formato decimal simple: "36.4271, -5.1480"
-  const dec = s.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
-  if (dec) return { lat: parseFloat(dec[1]), lng: parseFloat(dec[2]) };
+function parseGPS(raw){
+  if(!raw||!raw.trim())return null;
+  let s=raw.trim();
+  const dms=s.match(/(\d+)[°º]\s*(\d+)[''']\s*(\d+\.?\d*)["""°]?\s*([NSns])[,\s]+(\d+)[°º]\s*(\d+)[''']\s*(\d+\.?\d*)["""°]?\s*([EWew])/);
+  if(dms){let lat=parseInt(dms[1])+parseInt(dms[2])/60+parseFloat(dms[3])/3600;let lng=parseInt(dms[5])+parseInt(dms[6])/60+parseFloat(dms[7])/3600;if(/[Ss]/.test(dms[4]))lat=-lat;if(/[Ww]/.test(dms[8]))lng=-lng;return{lat,lng};}
+  s=s.replace(/(\d),(\d)/g,'$1.$2');
+  const dec=s.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if(dec)return{lat:parseFloat(dec[1]),lng:parseFloat(dec[2])};
   return null;
 }
-
-function previewGPS(inputId, previewId) {
-  const raw = document.getElementById(inputId).value;
-  const p = parseGPS(raw);
-  const el = document.getElementById(previewId);
-  if (p) el.textContent = 'Coordenadas OK: ' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5);
-  else el.textContent = raw.trim() ? 'Formato no reconocido' : '';
-}
-
-function navigate(patientId) {
-  const p = patients.find(x => x.id === patientId);
-  if (!p) return;
-  const coords = parseGPS(p.gps);
+window.previewGPS=function(inputId,previewId){
+  const raw=document.getElementById(inputId).value;
+  const p=parseGPS(raw);
+  const el=document.getElementById(previewId);
+  if(p)el.textContent='Coordenadas OK: '+p.lat.toFixed(5)+', '+p.lng.toFixed(5);
+  else el.textContent=raw.trim()?'Formato no reconocido':'';
+};
+window.navigate=function(patientId){
+  const p=patients.find(x=>x.id===patientId);
+  if(!p)return;
+  const coords=parseGPS(p.gps);
   let url;
-  if (coords) {
-    url = 'https://www.google.com/maps/dir/?api=1&destination=' + coords.lat + ',' + coords.lng + '&travelmode=driving';
-  } else if (p.addr && p.addr.trim()) {
-    url = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.addr) + '&travelmode=driving';
-  } else {
-    alert('Este paciente no tiene dirección ni coordenadas.');
-    return;
-  }
-  window.open(url, '_blank');
-}
+  if(coords){url='https://www.google.com/maps/dir/?api=1&destination='+coords.lat+','+coords.lng+'&travelmode=driving';}
+  else if(p.addr&&p.addr.trim()){url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.addr)+'&travelmode=driving';}
+  else{alert('Sin dirección ni coordenadas.');return;}
+  window.open(url,'_blank');
+};
 
-// ─── VOZ ─────────────────────────────────────────────────────
-function toggleVoice() {
-  if (listening) { stopVoice(); return; }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert('Tu navegador no soporta búsqueda por voz. Usa Chrome.'); return; }
-  recognition = new SR();
-  recognition.lang = 'es-ES';
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.onstart = () => {
-    listening = true;
-    document.getElementById('mic-btn').classList.add('listening');
-    document.getElementById('voice-status').textContent = 'Escuchando...';
-  };
-  recognition.onresult = (e) => {
-    const t = Array.from(e.results).map(r => r[0].transcript).join('');
-    document.getElementById('q').value = t;
-    render();
-    if (e.results[0].isFinal) { stopVoice(); }
-  };
-  recognition.onerror = () => { stopVoice(); };
-  recognition.onend = () => { stopVoice(); };
+window.toggleVoice=function(){
+  if(listening){stopVoice();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Usa Chrome para la búsqueda por voz.');return;}
+  recognition=new SR();recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=true;
+  recognition.onstart=()=>{listening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-status').textContent='Escuchando...';};
+  recognition.onresult=(e)=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('q').value=t;render();if(e.results[0].isFinal)stopVoice();};
+  recognition.onerror=()=>stopVoice();recognition.onend=()=>stopVoice();
   recognition.start();
-}
-function stopVoice() {
-  listening = false;
-  document.getElementById('mic-btn').classList.remove('listening');
-  document.getElementById('voice-status').textContent = '';
-  if (recognition) { try { recognition.stop(); } catch (e) {} }
-}
+};
+function stopVoice(){listening=false;document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-status').textContent='';if(recognition){try{recognition.stop();}catch(e){}}}
 
-// ─── LOGIN / LOGOUT ───────────────────────────────────────────
-async function doLogin() {
-  const inputUser = document.getElementById('login-user').value.trim();
-  const inputPass = document.getElementById('login-pass').value.trim();
-  document.getElementById('login-error').textContent = '';
-
-  if (!inputUser || !inputPass) {
-    document.getElementById('login-error').textContent = 'Introduce nombre y PIN.';
-    return;
-  }
-
-  // Normalizar: minúsculas sin espacios
-  const u = inputUser.toLowerCase().replace(/\s+/g, '');
-
-  // Comprobar admin hardcoded
-  if (u === ADMIN_USER && inputPass === ADMIN_PASS) {
-    currentUser = { username: ADMIN_USER, realname: 'Administrador', isAdmin: true };
-    isAdmin = true;
-    startApp();
-    return;
-  }
-
+window.doLogin=async function(){
+  const inputUser=document.getElementById('login-user').value.trim();
+  const inputPass=document.getElementById('login-pass').value.trim();
+  document.getElementById('login-error').textContent='';
+  if(!inputUser||!inputPass){document.getElementById('login-error').textContent='Introduce nombre y PIN.';return;}
+  const u=inputUser.toLowerCase().replace(/\s+/g,'');
+  if(u===ADMIN_USER&&inputPass===ADMIN_PASS){currentUser={username:ADMIN_USER,realname:'Administrador',isAdmin:true};isAdmin=true;startApp();return;}
   showLoader('Verificando...');
-  try {
-    const data = await fetchData();
-    users = data.users || [];
-    patients = data.patients || [];
-
-    // Buscar usuario normalizando también el username guardado
-    const found = users.find(x =>
-      x.username.toLowerCase().replace(/\s+/g, '') === u &&
-      x.password === inputPass &&
-      x.active === true
-    );
-
-    if (found) {
-      hideLoader();
-      currentUser = found;
-      isAdmin = !!found.isAdmin;
-      startApp();
-      return;
-    }
-
-    const blocked = users.find(x =>
-      x.username.toLowerCase().replace(/\s+/g, '') === u &&
-      x.active === false
-    );
-
+  try{
+    await loadUsers();
+    const found=users.find(x=>x.username.toLowerCase().replace(/\s+/g,'')===u&&x.password===inputPass&&x.active===true);
+    if(found){hideLoader();currentUser=found;isAdmin=!!found.isAdmin;startApp();return;}
+    const blocked=users.find(x=>x.username.toLowerCase().replace(/\s+/g,'')===u&&x.active===false);
     hideLoader();
-    if (blocked) {
-      document.getElementById('login-error').textContent = 'Tu acceso ha sido desactivado.';
-    } else {
-      document.getElementById('login-error').textContent = 'Nombre o PIN incorrectos.';
-    }
-  } catch (e) {
-    hideLoader();
-    document.getElementById('login-error').textContent = 'Error de conexión. Inténtalo de nuevo.';
-  }
-}
+    document.getElementById('login-error').textContent=blocked?'Tu acceso ha sido desactivado.':'Nombre o PIN incorrectos.';
+  }catch(e){hideLoader();document.getElementById('login-error').textContent='Error de conexión.';}
+};
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
 
-// Enter en PIN para login
-document.getElementById('login-pass').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doLogin();
-});
-
-function startApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'flex';
-  if (isAdmin) document.getElementById('tab-admin').style.display = '';
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  if(isAdmin)document.getElementById('tab-admin').style.display='';
   loadAll();
 }
+window.doLogout=function(){
+  currentUser=null;isAdmin=false;patients=[];users=[];
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('login-user').value='';document.getElementById('login-pass').value='';
+  document.getElementById('login-error').textContent='';
+  document.getElementById('tab-admin').style.display='none';
+  window.setTab('b');
+};
 
-function doLogout() {
-  currentUser = null;
-  isAdmin = false;
-  patients = [];
-  users = [];
-  document.getElementById('main-app').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'block';
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-error').textContent = '';
-  document.getElementById('tab-admin').style.display = 'none';
-  setTab('b');
+async function loadAll(){
+  setStatus('load','Cargando...');
+  try{
+    await loadPatients();await loadUsers();
+    setStatus('ok',patients.length+'');render();
+    if(isAdmin)renderUsers();
+  }catch(e){setStatus('err','Error de conexión.');}
 }
-
-// ─── CARGAR DATOS ─────────────────────────────────────────────
-async function loadAll() {
-  setStatus('load', 'Cargando...');
-  try {
-    const data = await fetchData();
-    patients = data.patients || [];
-    users = data.users || [];
-    patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    setStatus('ok', patients.length + '');
-    render();
-    if (isAdmin) renderUsers();
-  } catch (e) {
-    setStatus('err', 'Error de conexión.');
-  }
-}
-
-// ─── TABS ─────────────────────────────────────────────────────
-function setTab(t) {
-  ['b', 'a', 'admin'].forEach(x => {
-    const tab = document.getElementById('tab-' + x);
-    const pane = document.getElementById('pane-' + x);
-    if (tab) tab.classList.toggle('active', t === x);
-    if (pane) pane.style.display = t === x ? '' : 'none';
+window.refreshList=async function(){
+  const btn=document.getElementById('refresh-btn');
+  btn.style.animation='spin 0.7s linear infinite';
+  try{await loadPatients();setStatus('ok',patients.length+'');render();}
+  catch(e){setStatus('err','Error de conexión.');}
+  btn.style.animation='';
+};
+window.setTab=function(t){
+  ['b','a','admin'].forEach(x=>{
+    const tab=document.getElementById('tab-'+x);
+    const pane=document.getElementById('pane-'+x);
+    if(tab)tab.classList.toggle('active',t===x);
+    if(pane)pane.style.display=t===x?'':'none';
   });
-  if (t === 'admin') renderUsers();
-}
+  if(t==='admin')renderUsers();
+};
 
-// ─── RENDER PACIENTES ─────────────────────────────────────────
-function render() {
-  const q = (document.getElementById('q').value || '').toLowerCase().trim();
-  const filtered = q
-    ? patients.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        (p.addr && p.addr.toLowerCase().includes(q)) ||
-        (p.notes && p.notes.toLowerCase().includes(q))
-      )
-    : patients;
-
-  document.getElementById('cnt').textContent = filtered.length;
-  const lst = document.getElementById('lst');
-
-  if (!filtered.length) {
-    lst.innerHTML = '<div class="empty">' + (q ? 'No se encontró ningún paciente' : 'Aún no hay pacientes. Pulsa "Añadir".') + '</div>';
-    return;
-  }
-
-  lst.innerHTML = filtered.map(p => `
+function render(){
+  const q=(document.getElementById('q').value||'').toLowerCase().trim();
+  const filtered=q?patients.filter(p=>p.name.toLowerCase().includes(q)||(p.addr&&p.addr.toLowerCase().includes(q))||(p.notes&&p.notes.toLowerCase().includes(q))):patients;
+  document.getElementById('cnt').textContent=filtered.length;
+  const lst=document.getElementById('lst');
+  if(!filtered.length){lst.innerHTML='<div class="empty">'+(q?'No encontrado':'Aún no hay registros. Pulsa "Añadir".')+'</div>';return;}
+  lst.innerHTML=filtered.map(p=>`
     <div class="card">
       <div class="avatar">${initials(p.name)}</div>
       <div class="info">
         <div class="pname">${p.name}</div>
-        ${p.addr ? `<div class="paddress">${p.addr}</div>` : ''}
-        ${p.notes ? `<div class="pnotes">${p.notes}</div>` : ''}
+        ${p.addr?`<div class="paddress">${p.addr}</div>`:''}
+        ${p.notes?`<div class="pnotes">${p.notes}</div>`:''}
       </div>
       <div class="btns">
         <button class="btn-edit" onclick="openEdit('${p.id}')">
@@ -488,232 +377,112 @@ function render() {
           Ir
         </button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// ─── AÑADIR PACIENTE ──────────────────────────────────────────
-async function addP() {
-  const name = document.getElementById('n-nm').value.trim();
-  const addr = document.getElementById('n-ad').value.trim();
-  const gps = document.getElementById('n-gp').value.trim();
-  const notes = document.getElementById('n-no').value.trim();
-
-  if (!name) { alert('El nombre es obligatorio'); return; }
-  if (!addr && !gps) { alert('Necesitas al menos una dirección o coordenadas GPS'); return; }
-
+window.addP=async function(){
+  const name=document.getElementById('n-nm').value.trim();
+  const addr=document.getElementById('n-ad').value.trim();
+  const gps=document.getElementById('n-gp').value.trim();
+  const notes=document.getElementById('n-no').value.trim();
+  if(!name){alert('El nombre es obligatorio');return;}
+  if(!addr&&!gps){alert('Necesitas al menos una dirección o coordenadas GPS');return;}
   showLoader('Guardando...');
-  try {
-    const data = await fetchData();
-    data.patients = data.patients || [];
-    data.patients.push({
-      id: Date.now() + '',
-      name, addr, gps, notes,
-      addedBy: currentUser.realname || currentUser.username
-    });
-    data.patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    await saveData(data);
-    patients = data.patients;
-    document.getElementById('n-nm').value = '';
-    document.getElementById('n-ad').value = '';
-    document.getElementById('n-gp').value = '';
-    document.getElementById('n-no').value = '';
-    document.getElementById('gps-preview').textContent = '';
-    setStatus('ok', patients.length + '');
-    setTab('b');
-    document.getElementById('q').value = name;
-    render();
-  } catch (e) {
-    alert('Error al guardar. Inténtalo de nuevo.');
-  }
+  try{
+    const p={id:Date.now()+'',name,addr,gps,notes,addedBy:currentUser.realname||currentUser.username};
+    await savePatient(p);await loadPatients();
+    document.getElementById('n-nm').value='';document.getElementById('n-ad').value='';
+    document.getElementById('n-gp').value='';document.getElementById('n-no').value='';
+    document.getElementById('gps-preview').textContent='';
+    setStatus('ok',patients.length+'');setTab('b');
+    document.getElementById('q').value=name;render();
+  }catch(e){alert('Error al guardar.');}
   hideLoader();
-}
+};
 
-// ─── EDITAR PACIENTE ──────────────────────────────────────────
-function openEdit(patientId) {
-  const p = patients.find(x => x.id === patientId);
-  if (!p) return;
-  editPatientId = patientId;
-  document.getElementById('e-nm').value = p.name;
-  document.getElementById('e-ad').value = p.addr || '';
-  document.getElementById('e-gp').value = p.gps || '';
-  document.getElementById('e-no').value = p.notes || '';
-  document.getElementById('gps-preview-edit').textContent = '';
+window.openEdit=function(patientId){
+  const p=patients.find(x=>x.id===patientId);if(!p)return;
+  editPatientId=patientId;
+  document.getElementById('e-nm').value=p.name;document.getElementById('e-ad').value=p.addr||'';
+  document.getElementById('e-gp').value=p.gps||'';document.getElementById('e-no').value=p.notes||'';
+  document.getElementById('gps-preview-edit').textContent='';
   document.getElementById('edit-overlay').classList.add('open');
-}
-
-async function saveEdit() {
-  if (!editPatientId) return;
+};
+window.saveEdit=async function(){
+  if(!editPatientId)return;
   showLoader('Guardando...');
-  try {
-    const data = await fetchData();
-    const p = data.patients.find(x => x.id === editPatientId);
-    if (p) {
-      p.name = document.getElementById('e-nm').value.trim();
-      p.addr = document.getElementById('e-ad').value.trim();
-      p.gps = document.getElementById('e-gp').value.trim();
-      p.notes = document.getElementById('e-no').value.trim();
-    }
-    data.patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    await saveData(data);
-    patients = data.patients;
-    closeEdit();
-    render();
-  } catch (e) {
-    alert('Error al guardar. Inténtalo de nuevo.');
-  }
+  try{
+    const p={id:editPatientId,name:document.getElementById('e-nm').value.trim(),addr:document.getElementById('e-ad').value.trim(),gps:document.getElementById('e-gp').value.trim(),notes:document.getElementById('e-no').value.trim(),addedBy:patients.find(x=>x.id===editPatientId)?.addedBy||''};
+    await savePatient(p);await loadPatients();closeEdit();render();
+  }catch(e){alert('Error al guardar.');}
   hideLoader();
-}
-
-function closeEdit() {
-  document.getElementById('edit-overlay').classList.remove('open');
-  editPatientId = null;
-}
-
-// ─── ELIMINAR PACIENTE ────────────────────────────────────────
-async function deleteP(patientId) {
-  if (!confirm('¿Eliminar este paciente?')) return;
+};
+window.closeEdit=function(){document.getElementById('edit-overlay').classList.remove('open');editPatientId=null;};
+window.deleteP=async function(patientId){
+  if(!confirm('¿Eliminar este registro?'))return;
   showLoader('Eliminando...');
-  try {
-    const data = await fetchData();
-    data.patients = data.patients.filter(x => x.id !== patientId);
-    await saveData(data);
-    patients = data.patients;
-    setStatus('ok', patients.length + '');
-    render();
-  } catch (e) {
-    alert('Error al eliminar. Inténtalo de nuevo.');
-  }
+  try{await removePatient(patientId);await loadPatients();setStatus('ok',patients.length+'');render();}
+  catch(e){alert('Error al eliminar.');}
   hideLoader();
-}
+};
 
-// ─── USUARIOS (ADMIN) ─────────────────────────────────────────
-function renderUsers() {
-  const lst = document.getElementById('users-list');
-  if (!users.length) {
-    lst.innerHTML = '<div class="empty">No hay usuarios creados aún</div>';
-    return;
-  }
-  lst.innerHTML = users.map(u => `
-    <div class="user-card ${u.active ? '' : 'blocked'}">
-      <div class="avatar purple">${initials(u.realname || u.username)}</div>
+function renderUsers(){
+  const lst=document.getElementById('users-list');
+  if(!users.length){lst.innerHTML='<div class="empty">No hay usuarios creados aún</div>';return;}
+  lst.innerHTML=users.map(u=>`
+    <div class="user-card ${u.active?'':'blocked'}">
+      <div class="avatar purple">${initials(u.realname||u.username)}</div>
       <div class="user-info">
-        <div class="user-name">${u.realname || u.username}</div>
-        <div class="user-meta">@${u.username} · ${u.active ? 'Activo' : 'Bloqueado'}${u.createdAt ? ' · ' + u.createdAt : ''}</div>
+        <div class="user-name">${u.realname||u.username}</div>
+        <div class="user-meta">@${u.username} · ${u.active?'Activo':'Bloqueado'}${u.createdAt?' · '+u.createdAt:''}</div>
       </div>
       <div class="btns">
-        <button class="${u.active ? 'btn-block' : 'btn-unblock'}" onclick="toggleUser('${u.username}')">${u.active ? 'Bloquear' : 'Activar'}</button>
+        <button class="${u.active?'btn-block':'btn-unblock'}" onclick="toggleUser('${u.username}')">${u.active?'Bloquear':'Activar'}</button>
         <button class="btn-del" onclick="deleteUser('${u.username}')" title="Eliminar">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
         </button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-async function createUser() {
-  const realname = document.getElementById('new-uname').value.trim();
-  const password = document.getElementById('new-upass').value.trim();
-
-  if (!realname || !password) { alert('Rellena el nombre y el PIN'); return; }
-  if (!/^\d{4}$/.test(password)) { alert('El PIN debe ser exactamente 4 dígitos'); return; }
-
-  const username = realname.toLowerCase().replace(/\s+/g, '');
-
+window.createUser=async function(){
+  const realname=document.getElementById('new-uname').value.trim();
+  const password=document.getElementById('new-upass').value.trim();
+  if(!realname||!password){alert('Rellena el nombre y el PIN');return;}
+  if(!/^\d{4}$/.test(password)){alert('El PIN debe ser exactamente 4 dígitos');return;}
+  const username=realname.toLowerCase().replace(/\s+/g,'');
   showLoader('Creando usuario...');
-  try {
-    const data = await fetchData();
-    data.users = data.users || [];
-
-    if (data.users.find(u => u.username === username)) {
-      hideLoader();
-      alert('Ya existe un usuario con ese nombre');
-      return;
-    }
-
-    data.users.push({
-      username,
-      password,
-      realname,
-      isAdmin: false,
-      active: true,
-      createdAt: new Date().toLocaleDateString('es-ES')
-    });
-
-    await saveData(data);
-    users = data.users;
-    document.getElementById('new-uname').value = '';
-    document.getElementById('new-upass').value = '';
-    renderUsers();
-    alert('Usuario "' + realname + '" creado correctamente');
-  } catch (e) {
-    alert('Error al crear usuario. Inténtalo de nuevo.');
-  }
+  try{
+    await loadUsers();
+    if(users.find(u=>u.username===username)){hideLoader();alert('Ya existe un usuario con ese nombre');return;}
+    await saveUser({username,password,realname,isAdmin:false,active:true,createdAt:new Date().toLocaleDateString('es-ES')});
+    await loadUsers();
+    document.getElementById('new-uname').value='';document.getElementById('new-upass').value='';
+    renderUsers();alert('Usuario "'+realname+'" creado correctamente');
+  }catch(e){alert('Error al crear usuario.');}
   hideLoader();
-}
-
-async function toggleUser(username) {
+};
+window.toggleUser=async function(username){
   showLoader('Actualizando...');
-  try {
-    const data = await fetchData();
-    data.users = data.users || [];
-    const u = data.users.find(x => x.username === username);
-    if (!u) { hideLoader(); alert('Usuario no encontrado.'); return; }
-    u.active = !u.active;
-    await saveData(data);
-    users = data.users;
-    renderUsers();
-  } catch (e) {
-    alert('Error al actualizar. Inténtalo de nuevo.');
-  }
+  try{
+    const u=users.find(x=>x.username===username);if(!u){hideLoader();return;}
+    await updateDoc(doc(db,'users',username),{active:!u.active});
+    await loadUsers();renderUsers();
+  }catch(e){alert('Error al actualizar.');}
   hideLoader();
-}
-
-async function deleteUser(username) {
-  if (!confirm('¿Eliminar este usuario? No podrá volver a entrar.')) return;
+};
+window.deleteUser=async function(username){
+  if(!confirm('¿Eliminar este usuario?'))return;
   showLoader('Eliminando...');
-  try {
-    const data = await fetchData();
-    data.users = (data.users || []).filter(x => x.username !== username);
-    await saveData(data);
-    users = data.users;
-    renderUsers();
-  } catch (e) {
-    alert('Error al eliminar. Inténtalo de nuevo.');
-  }
+  try{await removeUser(username);await loadUsers();renderUsers();}
+  catch(e){alert('Error al eliminar.');}
   hideLoader();
-}
+};
 
-async function refreshList() {
-  const btn = document.getElementById('refresh-btn');
-  btn.style.animation = 'spin 0.7s linear infinite';
-  try {
-    const data = await fetchData();
-    patients = data.patients || [];
-    users = data.users || [];
-    patients.sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    setStatus('ok', patients.length + '');
-    render();
-  } catch (e) {
-    setStatus('err', 'Error de conexión.');
-  }
-  btn.style.animation = '';
-}
-
-
-async function init() {
-  showLoader('Iniciando...');
-  try {
-    // Verificar que la conexión funciona antes de mostrar login
-    await fetchData();
-  } catch (e) {
-    // Si falla, mostramos login igualmente — el error se verá al intentar entrar
-  }
-  hideLoader();
-  document.getElementById('login-screen').style.display = 'block';
-}
-
-init();
+// INICIO
+showLoader('Iniciando...');
+try{await loadUsers();}catch(e){}
+hideLoader();
+document.getElementById('login-screen').style.display='block';
 </script>
 </body>
 </html>
