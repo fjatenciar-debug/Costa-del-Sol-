@@ -464,6 +464,9 @@ window.addP=async function(){
   const notes=document.getElementById('n-no').value.trim();
   if(!name){alert('El nombre es obligatorio');return;}
   if(!addr&&!gps){alert('Necesitas al menos una dirección o coordenadas GPS');return;}
+  // Comprobar duplicado
+  const duplicate=patients.find(p=>p.name.toLowerCase().replace(/\s+/g,'')===name.toLowerCase().replace(/\s+/g,''));
+  if(duplicate){alert('⚠️ Ya existe un registro con ese nombre.');return;}
   showLoader('Guardando...');
   try{
     const p={id:Date.now()+'',name,addr,gps,notes,addedBy:currentUser.realname||currentUser.username,createdAt:new Date().toLocaleDateString('es-ES')};
