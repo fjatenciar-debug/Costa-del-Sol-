@@ -384,6 +384,13 @@ function startApp(){
   document.getElementById('main-app').style.display='flex';
   if(isAdmin) document.getElementById('tab-admin').style.display='';
   if(!isAdmin) document.getElementById('btn-change-pass').style.display='';
+  // Mostrar ayuda la primera vez
+  if(!localStorage.getItem('help_seen')){
+    setTimeout(()=>{
+      openHelp();
+      localStorage.setItem('help_seen','1');
+    },800);
+  }
   loadAll();
 }
 window.doLogout=function(){
