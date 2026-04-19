@@ -38,9 +38,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 @keyframes spin{to{transform:rotate(360deg)}}
 .ambulance-lane{position:relative;height:28px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
 .ambulance{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;animation:drive 7s linear infinite;white-space:nowrap;line-height:1}
-@keyframes drive{0%{left:-40px;transform:translateY(-50%) scaleX(1)}49.9%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(1)}50%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(-1)}100%{left:-40px;transform:translateY(-50%) scaleX(-1)}}
-.ambulance-flash{display:inline-block;animation:flash 0.4s linear infinite alternate}
-@keyframes flash{from{filter:hue-rotate(0deg) brightness(1)}to{filter:hue-rotate(180deg) brightness(1.3)}}
+@keyframes drive{0%{left:-40px;transform:translateY(-50%) scaleX(-1)}49.9%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(-1)}50%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(1)}100%{left:-40px;transform:translateY(-50%) scaleX(1)}}
 .voice-status{font-size:12px;color:#E24B4A;margin-bottom:8px;min-height:18px;text-align:center;font-weight:500}
 .count{font-size:12px;color:#888;margin-bottom:10px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -141,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
 
     <div class="ambulance-lane">
-      <span class="ambulance">🚑<span class="ambulance-flash">🔵</span></span>
+      <span class="ambulance">🚑</span>
     </div>
 
     <div class="tabs">
