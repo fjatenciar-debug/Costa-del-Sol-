@@ -36,9 +36,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .mic-btn.listening svg{stroke:#E24B4A}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ambulance-lane{position:relative;height:28px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
-.ambulance{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;animation:drive 7s linear infinite;white-space:nowrap;line-height:1}
-@keyframes drive{0%{left:-40px;transform:translateY(-50%) scaleX(-1)}49.9%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(-1)}50%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(1)}100%{left:-40px;transform:translateY(-50%) scaleX(1)}}
+.ambulance-lane{position:relative;height:32px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
+.amb{position:absolute;top:50%;transform:translateY(-50%) scaleX(-1);font-size:20px;white-space:nowrap;line-height:1;transition:left 0.05s linear}
+.patient{position:absolute;top:50%;font-size:16px;white-space:nowrap;line-height:1;transition:opacity 0.3s}
+.patient.hide{opacity:0}
 .voice-status{font-size:12px;color:#E24B4A;margin-bottom:8px;min-height:18px;text-align:center;font-weight:500}
 .count{font-size:12px;color:#888;margin-bottom:10px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -86,6 +87,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .user-name{font-size:14px;font-weight:600;color:#1a1a1a}
 .user-meta{font-size:11px;color:#888;margin-top:2px}
 .divider{height:1px;background:#f0f0f0;margin:16px 0}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:opacity 0.25s,transform 0.25s;z-index:999;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.btn-export{background:#f0f0f0;color:#444;border:1px solid #ddd;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:16px}
+.btn-export:active{opacity:0.8}
+.count-anim{font-size:12px;color:#888;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -94,6 +100,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="spinner"></div>
   <span id="loader-text">Cargando...</span>
 </div>
+<div id="toast" class="toast"></div>
 
 <!-- LOGIN -->
 <div id="login-screen" class="login-screen" style="display:none">
@@ -138,8 +145,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span id="s-text">Conectando...</span>
     </div>
 
-    <div class="ambulance-lane">
-      <span class="ambulance">🚑</span>
+    <div class="ambulance-lane" id="amb-lane">
+      <span class="patient" id="p1" style="left:47%;transform:translateY(-60%)">🚶</span>
+      <span class="patient" id="p2" style="left:53%;transform:translateY(-55%)">🚶</span>
+      <span class="amb" id="amb">🚑</span>
     </div>
 
     <div class="tabs">
@@ -190,6 +199,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
     <!-- ADMIN -->
     <div id="pane-admin" style="display:none">
+      <button class="btn-export" onclick="exportCSV()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar registros a CSV
+      </button>
       <div class="section-title">Usuarios con acceso</div>
       <div id="users-list"></div>
       <div class="divider"></div>
@@ -421,14 +434,14 @@ async function loadAll(){
   setStatus('load','Cargando...');
   try{
     await loadPatients();await loadUsers();
-    setStatus('ok',patients.length+'');render();
+    setStatus('ok','');animateCount('s-text', patients.length);render();
     if(isAdmin)renderUsers();
   }catch(e){setStatus('err','Error de conexión.');}
 }
 window.refreshList=async function(){
   const btn=document.getElementById('refresh-btn');
   btn.style.animation='spin 0.7s linear infinite';
-  try{await loadPatients();setStatus('ok',patients.length+'');render();}
+  try{await loadPatients();setStatus('ok','');animateCount('s-text',patients.length);render();}
   catch(e){setStatus('err','Error de conexión.');}
   btn.style.animation='';
 };
@@ -478,8 +491,8 @@ function renderRecientes(){
 
 window.render=function render(){
   const q=(document.getElementById('q').value||'').toLowerCase().trim();
-  const filtered=q?patients.filter(p=>p.name.toLowerCase().startsWith(q)||(p.addr&&p.addr.toLowerCase().includes(q))||(p.notes&&p.notes.toLowerCase().includes(q))):patients;
-  document.getElementById('cnt').textContent=filtered.length;
+  const filtered=q?patients.filter(p=>p.name.toLowerCase().includes(q)||(p.addr&&p.addr.toLowerCase().includes(q))||(p.notes&&p.notes.toLowerCase().includes(q))):patients;
+  animateCount('cnt', filtered.length);
   const lst=document.getElementById('lst');
   if(!filtered.length){lst.innerHTML='<div class="empty">'+(q?'No encontrado':'Aún no hay registros. Pulsa "Añadir".')+'</div>';return;}
   lst.innerHTML=filtered.map(p=>`
@@ -523,9 +536,10 @@ window.addP=async function(){
     document.getElementById('n-nm').value='';document.getElementById('n-ad').value='';
     document.getElementById('n-gp').value='';document.getElementById('n-no').value='';
     document.getElementById('gps-preview').textContent='';
-    setStatus('ok',patients.length+'');setTab('b');
+    setStatus('ok','');animateCount('s-text',patients.length);setTab('b');
     document.getElementById('q').value=name;render();
-  }catch(e){alert('Error al guardar.');}
+    showToast('✅ Paciente guardado correctamente');
+  }catch(e){showToast('❌ Error al guardar.');}
   hideLoader();
 };
 
@@ -543,15 +557,16 @@ window.saveEdit=async function(){
   try{
     const p={id:editPatientId,name:document.getElementById('e-nm').value.trim(),addr:document.getElementById('e-ad').value.trim(),gps:document.getElementById('e-gp').value.trim(),notes:document.getElementById('e-no').value.trim(),addedBy:patients.find(x=>x.id===editPatientId)?.addedBy||''};
     await savePatient(p);await loadPatients();closeEdit();render();
-  }catch(e){alert('Error al guardar.');}
+    showToast('✅ Cambios guardados');
+  }catch(e){showToast('❌ Error al guardar.');}
   hideLoader();
 };
 window.closeEdit=function(){document.getElementById('edit-overlay').classList.remove('open');editPatientId=null;};
 window.deleteP=async function(patientId){
   if(!confirm('¿Eliminar este registro?'))return;
   showLoader('Eliminando...');
-  try{await removePatient(patientId);await loadPatients();setStatus('ok',patients.length+'');render();}
-  catch(e){alert('Error al eliminar.');}
+  try{await removePatient(patientId);await loadPatients();setStatus('ok','');animateCount('s-text',patients.length);render();showToast('🗑️ Registro eliminado');}
+  catch(e){showToast('❌ Error al eliminar.');}
   hideLoader();
 };
 
@@ -681,6 +696,107 @@ showLoader('Iniciando...');
 try{await loadUsers();}catch(e){}
 hideLoader();
 document.getElementById('login-screen').style.display='block';
+
+// ─── TOAST ────────────────────────────────────────────────────
+let toastTimer=null;
+window.showToast=function(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+};
+
+// ─── CONTADOR ANIMADO ─────────────────────────────────────────
+window.animateCount=function(elId,target){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const start=parseInt(el.textContent)||0;
+  const diff=target-start;
+  const steps=30;
+  let i=0;
+  const iv=setInterval(()=>{
+    i++;
+    el.textContent=Math.round(start+(diff*i/steps));
+    if(i>=steps){el.textContent=target;clearInterval(iv);}
+  },16);
+};
+
+// ─── EXPORTAR CSV ─────────────────────────────────────────────
+window.exportCSV=function(){
+  if(!patients.length){showToast('No hay registros para exportar');return;}
+  const header='Nombre,Dirección,GPS,Notas,Añadido por,Fecha';
+  const rows=patients.map(p=>[p.name,p.addr||'',p.gps||'',p.notes||'',p.addedBy||'',p.createdAt||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv='\uFEFF'+header+'\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='pacientes_'+new Date().toLocaleDateString('es-ES').replace(/\//g,'-')+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  showToast('✅ CSV exportado ('+patients.length+' registros)');
+};
+
+// ─── AMBULANCIA ───────────────────────────────────────────────
+(function(){
+  const amb  = document.getElementById('amb');
+  const p1   = document.getElementById('p1');
+  const p2   = document.getElementById('p2');
+  const lane = document.getElementById('amb-lane');
+
+  let x = -40, dir = 1;
+  let pauseFrames = 0;
+  let patientsGone = false;
+  let pickedUp = false;
+
+  function W(){ return lane.offsetWidth || 300; }
+
+  setInterval(function(){
+    if(pauseFrames > 0){ pauseFrames--; return; }
+
+    const w = W();
+    const pickR = w * 0.43;  // punto recogida yendo a la derecha
+    const pickL = w * 0.38;  // punto recogida yendo a la izquierda
+
+    x += 1.5 * dir;
+
+    // Parada recogida →
+    if(dir === 1 && !pickedUp && x >= pickR){
+      x = pickR;
+      pickedUp = true;
+      pauseFrames = 60;  // ~1 segundo parado
+      p1.classList.add('hide');
+      p2.classList.add('hide');
+    }
+
+    // Parada recogida ←
+    if(dir === -1 && !pickedUp && x <= pickL){
+      x = pickL;
+      pickedUp = true;
+      pauseFrames = 60;
+      p1.classList.add('hide');
+      p2.classList.add('hide');
+    }
+
+    // Sale por la derecha → da la vuelta
+    if(dir === 1 && x > w + 40){
+      dir = -1;
+      pickedUp = false;
+      p1.classList.remove('hide');
+      p2.classList.remove('hide');
+    }
+
+    // Sale por la izquierda → da la vuelta
+    if(dir === -1 && x < -45){
+      dir = 1;
+      pickedUp = false;
+      p1.classList.remove('hide');
+      p2.classList.remove('hide');
+    }
+
+    amb.style.left = x + 'px';
+    amb.style.transform = `translateY(-50%) scaleX(${dir===1 ? -1 : 1})`;
+
+  }, 16);
+})();
 </script>
 </body>
 </html>
