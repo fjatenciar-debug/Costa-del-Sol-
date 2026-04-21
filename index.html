@@ -36,9 +36,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .mic-btn.listening svg{stroke:#E24B4A}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ambulance-lane{position:relative;height:28px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
-.ambulance{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;animation:drive 7s linear infinite;white-space:nowrap;line-height:1}
-@keyframes drive{0%{left:-40px;transform:translateY(-50%) scaleX(-1)}49.9%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(-1)}50%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(1)}100%{left:-40px;transform:translateY(-50%) scaleX(1)}}
+.ambulance-lane{position:relative;height:32px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
+.amb{position:absolute;top:50%;transform:translateY(-50%) scaleX(-1);font-size:20px;white-space:nowrap;line-height:1;transition:left 0.05s linear}
+.patient{position:absolute;top:50%;font-size:16px;white-space:nowrap;line-height:1;transition:opacity 0.3s}
+.patient.hide{opacity:0}
 .voice-status{font-size:12px;color:#E24B4A;margin-bottom:8px;min-height:18px;text-align:center;font-weight:500}
 .count{font-size:12px;color:#888;margin-bottom:10px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -138,8 +139,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span id="s-text">Conectando...</span>
     </div>
 
-    <div class="ambulance-lane">
-      <span class="ambulance">🚑</span>
+    <div class="ambulance-lane" id="amb-lane">
+      <span class="patient" id="p1" style="left:47%;transform:translateY(-60%)">🧑‍🦯</span>
+      <span class="patient" id="p2" style="left:52%;transform:translateY(-55%)">👴</span>
+      <span class="amb" id="amb">🚑</span>
     </div>
 
     <div class="tabs">
@@ -681,6 +684,114 @@ showLoader('Iniciando...');
 try{await loadUsers();}catch(e){}
 hideLoader();
 document.getElementById('login-screen').style.display='block';
+
+// ─── AMBULANCIA ───────────────────────────────────────────────
+(function(){
+  const amb = document.getElementById('amb');
+  const p1  = document.getElementById('p1');
+  const p2  = document.getElementById('p2');
+  const lane = document.getElementById('amb-lane');
+
+  const SPEED = 1.2;      // px per frame
+  const STOP_MARGIN = 38; // px antes del centro donde frena
+  const PAUSE = 1400;     // ms esperando que suban
+  const BOARD = 500;      // ms subiendo pacientes
+
+  let x = -40;
+  let dir = 1;            // 1 = derecha, -1 = izquierda
+  let state = 'moving';   // moving | stopping | boarding | resuming
+  let patientsVisible = true;
+  let timer = null;
+
+  function getWidth(){ return lane.offsetWidth || 300; }
+  function getMidStop(){ return getWidth() * 0.44; } // centro menos margen
+
+  function setAmbPos(){
+    amb.style.left = x + 'px';
+    // scaleX(-1) mira a la derecha, scaleX(1) mira a la izquierda
+    amb.style.transform = `translateY(-50%) scaleX(${dir === 1 ? -1 : 1})`;
+  }
+
+  function showPatients(show){
+    patientsVisible = show;
+    p1.classList.toggle('hide', !show);
+    p2.classList.toggle('hide', !show);
+  }
+
+  function resetPatients(){
+    // Reposicionar pacientes para el próximo paso
+    const w = getWidth();
+    if(dir === 1){
+      p1.style.left = '47%'; p2.style.left = '52%';
+    } else {
+      p1.style.left = '44%'; p2.style.left = '49%';
+    }
+    setTimeout(()=> showPatients(true), 300);
+  }
+
+  function step(){
+    const w = getWidth();
+    const mid = getMidStop();
+    const endR = w + 30;
+    const endL = -45;
+
+    if(state === 'moving'){
+      x += SPEED * dir;
+
+      // ¿Llegamos al punto de recogida?
+      if(dir === 1 && x >= mid){
+        x = mid; state = 'stopping';
+        setAmbPos();
+        // Pausa y luego sube pacientes
+        timer = setTimeout(()=>{
+          state = 'boarding';
+          showPatients(false);
+          timer = setTimeout(()=>{
+            state = 'resuming';
+          }, BOARD);
+        }, PAUSE);
+        return;
+      }
+      if(dir === -1 && x <= mid - 10){
+        x = mid - 10; state = 'stopping';
+        setAmbPos();
+        timer = setTimeout(()=>{
+          state = 'boarding';
+          showPatients(false);
+          timer = setTimeout(()=>{
+            state = 'resuming';
+          }, BOARD);
+        }, PAUSE);
+        return;
+      }
+
+      // ¿Llegamos al borde?
+      if(dir === 1 && x >= endR){
+        x = endR;
+        dir = -1;
+        // Reposicionar pacientes mientras la ambulancia está fuera de pantalla
+        resetPatients();
+      }
+      if(dir === -1 && x <= endL){
+        x = endL;
+        dir = 1;
+        resetPatients();
+      }
+    }
+
+    if(state === 'resuming'){
+      x += SPEED * dir;
+      if(dir === 1 && x >= endR){ x = endR; dir = -1; state = 'moving'; resetPatients(); }
+      else if(dir === -1 && x <= endL){ x = endL; dir = 1; state = 'moving'; resetPatients(); }
+    }
+
+    setAmbPos();
+    requestAnimationFrame(step);
+  }
+
+  setAmbPos();
+  requestAnimationFrame(step);
+})();
 </script>
 </body>
 </html>
