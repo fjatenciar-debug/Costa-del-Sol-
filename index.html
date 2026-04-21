@@ -140,8 +140,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
 
     <div class="ambulance-lane" id="amb-lane">
-      <span class="patient" id="p1" style="left:47%;transform:translateY(-60%)">🧑‍🦯</span>
-      <span class="patient" id="p2" style="left:52%;transform:translateY(-55%)">👴</span>
+      <span class="patient" id="p1" style="left:47%;transform:translateY(-60%)">🚶</span>
+      <span class="patient" id="p2" style="left:53%;transform:translateY(-55%)">🚶</span>
       <span class="amb" id="amb">🚑</span>
     </div>
 
@@ -687,110 +687,65 @@ document.getElementById('login-screen').style.display='block';
 
 // ─── AMBULANCIA ───────────────────────────────────────────────
 (function(){
-  const amb = document.getElementById('amb');
-  const p1  = document.getElementById('p1');
-  const p2  = document.getElementById('p2');
+  const amb  = document.getElementById('amb');
+  const p1   = document.getElementById('p1');
+  const p2   = document.getElementById('p2');
   const lane = document.getElementById('amb-lane');
 
-  const SPEED = 1.2;      // px per frame
-  const STOP_MARGIN = 38; // px antes del centro donde frena
-  const PAUSE = 1400;     // ms esperando que suban
-  const BOARD = 500;      // ms subiendo pacientes
+  const SPEED = 1.5;
+  const PAUSE = 1200;
+  const BOARD = 500;
 
-  let x = -40;
-  let dir = 1;            // 1 = derecha, -1 = izquierda
-  let state = 'moving';   // moving | stopping | boarding | resuming
-  let patientsVisible = true;
-  let timer = null;
+  let x = -40, dir = 1, paused = false;
 
-  function getWidth(){ return lane.offsetWidth || 300; }
-  function getMidStop(){ return getWidth() * 0.44; } // centro menos margen
+  function W(){ return lane.offsetWidth || 300; }
+  function pickupX(){ return W() * 0.43; }
 
-  function setAmbPos(){
-    amb.style.left = x + 'px';
-    // scaleX(-1) mira a la derecha, scaleX(1) mira a la izquierda
-    amb.style.transform = `translateY(-50%) scaleX(${dir === 1 ? -1 : 1})`;
-  }
+  function face(){ amb.style.transform = `translateY(-50%) scaleX(${dir===1?-1:1})`; }
+  function hideP(){ p1.classList.add('hide'); p2.classList.add('hide'); }
+  function showP(){ p1.classList.remove('hide'); p2.classList.remove('hide'); }
 
-  function showPatients(show){
-    patientsVisible = show;
-    p1.classList.toggle('hide', !show);
-    p2.classList.toggle('hide', !show);
-  }
+  function loop(){
+    if(paused){ return; }
 
-  function resetPatients(){
-    // Reposicionar pacientes para el próximo paso
-    const w = getWidth();
-    if(dir === 1){
-      p1.style.left = '47%'; p2.style.left = '52%';
-    } else {
-      p1.style.left = '44%'; p2.style.left = '49%';
+    x += SPEED * dir;
+    const px = pickupX();
+    const w  = W();
+
+    // ¿Llega al punto de recogida?
+    if(!paused && dir===1 && x >= px){
+      x = px; paused = true; face();
+      amb.style.left = x+'px';
+      setTimeout(()=>{ hideP();
+        setTimeout(()=>{ paused=false; requestAnimationFrame(loop); }, BOARD);
+      }, PAUSE);
+      return;
     }
-    setTimeout(()=> showPatients(true), 300);
-  }
-
-  function step(){
-    const w = getWidth();
-    const mid = getMidStop();
-    const endR = w + 30;
-    const endL = -45;
-
-    if(state === 'moving'){
-      x += SPEED * dir;
-
-      // ¿Llegamos al punto de recogida?
-      if(dir === 1 && x >= mid){
-        x = mid; state = 'stopping';
-        setAmbPos();
-        // Pausa y luego sube pacientes
-        timer = setTimeout(()=>{
-          state = 'boarding';
-          showPatients(false);
-          timer = setTimeout(()=>{
-            state = 'resuming';
-          }, BOARD);
-        }, PAUSE);
-        return;
-      }
-      if(dir === -1 && x <= mid - 10){
-        x = mid - 10; state = 'stopping';
-        setAmbPos();
-        timer = setTimeout(()=>{
-          state = 'boarding';
-          showPatients(false);
-          timer = setTimeout(()=>{
-            state = 'resuming';
-          }, BOARD);
-        }, PAUSE);
-        return;
-      }
-
-      // ¿Llegamos al borde?
-      if(dir === 1 && x >= endR){
-        x = endR;
-        dir = -1;
-        // Reposicionar pacientes mientras la ambulancia está fuera de pantalla
-        resetPatients();
-      }
-      if(dir === -1 && x <= endL){
-        x = endL;
-        dir = 1;
-        resetPatients();
-      }
+    if(!paused && dir===-1 && x <= px - 20){
+      x = px-20; paused = true; face();
+      amb.style.left = x+'px';
+      setTimeout(()=>{ hideP();
+        setTimeout(()=>{ paused=false; requestAnimationFrame(loop); }, BOARD);
+      }, PAUSE);
+      return;
     }
 
-    if(state === 'resuming'){
-      x += SPEED * dir;
-      if(dir === 1 && x >= endR){ x = endR; dir = -1; state = 'moving'; resetPatients(); }
-      else if(dir === -1 && x <= endL){ x = endL; dir = 1; state = 'moving'; resetPatients(); }
+    // ¿Sale por el borde?
+    if(dir===1 && x > w+40){
+      x = w+40; dir=-1; showP(); face();
+    }
+    if(dir===-1 && x < -45){
+      x = -45; dir=1; showP(); face();
     }
 
-    setAmbPos();
-    requestAnimationFrame(step);
+    amb.style.left = x+'px';
+    face();
+    requestAnimationFrame(loop);
   }
 
-  setAmbPos();
-  requestAnimationFrame(step);
+  face();
+  amb.style.left = x+'px';
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
