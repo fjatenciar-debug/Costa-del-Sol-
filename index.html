@@ -692,60 +692,60 @@ document.getElementById('login-screen').style.display='block';
   const p2   = document.getElementById('p2');
   const lane = document.getElementById('amb-lane');
 
-  const SPEED = 1.5;
-  const PAUSE = 1200;
-  const BOARD = 500;
-
-  let x = -40, dir = 1, paused = false;
+  let x = -40, dir = 1;
+  let pauseFrames = 0;
+  let patientsGone = false;
+  let pickedUp = false;
 
   function W(){ return lane.offsetWidth || 300; }
-  function pickupX(){ return W() * 0.43; }
 
-  function face(){ amb.style.transform = `translateY(-50%) scaleX(${dir===1?-1:1})`; }
-  function hideP(){ p1.classList.add('hide'); p2.classList.add('hide'); }
-  function showP(){ p1.classList.remove('hide'); p2.classList.remove('hide'); }
+  setInterval(function(){
+    if(pauseFrames > 0){ pauseFrames--; return; }
 
-  function loop(){
-    if(paused){ return; }
+    const w = W();
+    const pickR = w * 0.43;  // punto recogida yendo a la derecha
+    const pickL = w * 0.38;  // punto recogida yendo a la izquierda
 
-    x += SPEED * dir;
-    const px = pickupX();
-    const w  = W();
+    x += 1.5 * dir;
 
-    // ¿Llega al punto de recogida?
-    if(!paused && dir===1 && x >= px){
-      x = px; paused = true; face();
-      amb.style.left = x+'px';
-      setTimeout(()=>{ hideP();
-        setTimeout(()=>{ paused=false; requestAnimationFrame(loop); }, BOARD);
-      }, PAUSE);
-      return;
-    }
-    if(!paused && dir===-1 && x <= px - 20){
-      x = px-20; paused = true; face();
-      amb.style.left = x+'px';
-      setTimeout(()=>{ hideP();
-        setTimeout(()=>{ paused=false; requestAnimationFrame(loop); }, BOARD);
-      }, PAUSE);
-      return;
+    // Parada recogida →
+    if(dir === 1 && !pickedUp && x >= pickR){
+      x = pickR;
+      pickedUp = true;
+      pauseFrames = 60;  // ~1 segundo parado
+      p1.classList.add('hide');
+      p2.classList.add('hide');
     }
 
-    // ¿Sale por el borde?
-    if(dir===1 && x > w+40){
-      x = w+40; dir=-1; showP(); face();
-    }
-    if(dir===-1 && x < -45){
-      x = -45; dir=1; showP(); face();
+    // Parada recogida ←
+    if(dir === -1 && !pickedUp && x <= pickL){
+      x = pickL;
+      pickedUp = true;
+      pauseFrames = 60;
+      p1.classList.add('hide');
+      p2.classList.add('hide');
     }
 
-    amb.style.left = x+'px';
-    face();
-    requestAnimationFrame(loop);
-  }
+    // Sale por la derecha → da la vuelta
+    if(dir === 1 && x > w + 40){
+      dir = -1;
+      pickedUp = false;
+      p1.classList.remove('hide');
+      p2.classList.remove('hide');
+    }
 
-  face();
-  amb.style.left = x+'px';
-  requestAnimationFrame(loop);
+    // Sale por la izquierda → da la vuelta
+    if(dir === -1 && x < -45){
+      dir = 1;
+      pickedUp = false;
+      p1.classList.remove('hide');
+      p2.classList.remove('hide');
+    }
+
+    amb.style.left = x + 'px';
+    amb.style.transform = `translateY(-50%) scaleX(${dir===1 ? -1 : 1})`;
+
+  }, 16);
 })();
 </script>
 </body>
