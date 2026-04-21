@@ -36,10 +36,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .mic-btn.listening svg{stroke:#E24B4A}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ambulance-lane{position:relative;height:32px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
-.amb{position:absolute;top:50%;transform:translateY(-50%) scaleX(-1);font-size:20px;white-space:nowrap;line-height:1;transition:left 0.05s linear}
-.patient{position:absolute;top:50%;font-size:16px;white-space:nowrap;line-height:1;transition:opacity 0.3s}
-.patient.hide{opacity:0}
+.ambulance-lane{position:relative;height:28px;overflow:hidden;margin-bottom:10px;margin-top:-6px}
+.ambulance{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;animation:drive 7s linear infinite;white-space:nowrap;line-height:1}
+@keyframes drive{0%{left:-40px;transform:translateY(-50%) scaleX(-1)}49.9%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(-1)}50%{left:calc(100% + 10px);transform:translateY(-50%) scaleX(1)}100%{left:-40px;transform:translateY(-50%) scaleX(1)}}
 .voice-status{font-size:12px;color:#E24B4A;margin-bottom:8px;min-height:18px;text-align:center;font-weight:500}
 .count{font-size:12px;color:#888;margin-bottom:10px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -139,10 +138,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span id="s-text">Conectando...</span>
     </div>
 
-    <div class="ambulance-lane" id="amb-lane">
-      <span class="patient" id="p1" style="left:47%;transform:translateY(-60%)">🚶</span>
-      <span class="patient" id="p2" style="left:53%;transform:translateY(-55%)">🚶</span>
-      <span class="amb" id="amb">🚑</span>
+    <div class="ambulance-lane">
+      <span class="ambulance">🚑</span>
     </div>
 
     <div class="tabs">
@@ -684,69 +681,6 @@ showLoader('Iniciando...');
 try{await loadUsers();}catch(e){}
 hideLoader();
 document.getElementById('login-screen').style.display='block';
-
-// ─── AMBULANCIA ───────────────────────────────────────────────
-(function(){
-  const amb  = document.getElementById('amb');
-  const p1   = document.getElementById('p1');
-  const p2   = document.getElementById('p2');
-  const lane = document.getElementById('amb-lane');
-
-  let x = -40, dir = 1;
-  let pauseFrames = 0;
-  let patientsGone = false;
-  let pickedUp = false;
-
-  function W(){ return lane.offsetWidth || 300; }
-
-  setInterval(function(){
-    if(pauseFrames > 0){ pauseFrames--; return; }
-
-    const w = W();
-    const pickR = w * 0.43;  // punto recogida yendo a la derecha
-    const pickL = w * 0.38;  // punto recogida yendo a la izquierda
-
-    x += 1.5 * dir;
-
-    // Parada recogida →
-    if(dir === 1 && !pickedUp && x >= pickR){
-      x = pickR;
-      pickedUp = true;
-      pauseFrames = 60;  // ~1 segundo parado
-      p1.classList.add('hide');
-      p2.classList.add('hide');
-    }
-
-    // Parada recogida ←
-    if(dir === -1 && !pickedUp && x <= pickL){
-      x = pickL;
-      pickedUp = true;
-      pauseFrames = 60;
-      p1.classList.add('hide');
-      p2.classList.add('hide');
-    }
-
-    // Sale por la derecha → da la vuelta
-    if(dir === 1 && x > w + 40){
-      dir = -1;
-      pickedUp = false;
-      p1.classList.remove('hide');
-      p2.classList.remove('hide');
-    }
-
-    // Sale por la izquierda → da la vuelta
-    if(dir === -1 && x < -45){
-      dir = 1;
-      pickedUp = false;
-      p1.classList.remove('hide');
-      p2.classList.remove('hide');
-    }
-
-    amb.style.left = x + 'px';
-    amb.style.transform = `translateY(-50%) scaleX(${dir===1 ? -1 : 1})`;
-
-  }, 16);
-})();
 </script>
 </body>
 </html>
