@@ -491,7 +491,10 @@ function renderRecientes(){
 
 window.render=function render(){
   const q=(document.getElementById('q').value||'').toLowerCase().trim();
-  const filtered=q?patients.filter(p=>p.name.toLowerCase().includes(q)||(p.addr&&p.addr.toLowerCase().includes(q))||(p.notes&&p.notes.toLowerCase().includes(q))):patients;
+  const filtered=q?[
+    ...patients.filter(p=>p.name.toLowerCase().startsWith(q)),
+    ...patients.filter(p=>!p.name.toLowerCase().startsWith(q)&&(p.name.toLowerCase().includes(q)||(p.addr&&p.addr.toLowerCase().includes(q))||(p.notes&&p.notes.toLowerCase().includes(q))))
+  ]:patients;
   animateCount('cnt', filtered.length);
   const lst=document.getElementById('lst');
   if(!filtered.length){lst.innerHTML='<div class="empty">'+(q?'No encontrado':'Aún no hay registros. Pulsa "Añadir".')+'</div>';return;}
