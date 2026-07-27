@@ -489,11 +489,15 @@ function renderRecientes(){
     </div>`).join('');
 }
 
+function normalize(s){
+  return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
 window.render=function render(){
-  const q=(document.getElementById('q').value||'').toLowerCase().trim();
+  const q=normalize((document.getElementById('q').value||'').trim());
   const filtered=q?[
-    ...patients.filter(p=>p.name.toLowerCase().startsWith(q)),
-    ...patients.filter(p=>!p.name.toLowerCase().startsWith(q)&&(p.name.toLowerCase().includes(q)||(p.addr&&p.addr.toLowerCase().includes(q))||(p.notes&&p.notes.toLowerCase().includes(q))))
+    ...patients.filter(p=>normalize(p.name).startsWith(q)),
+    ...patients.filter(p=>!normalize(p.name).startsWith(q)&&(normalize(p.name).includes(q)||(p.addr&&normalize(p.addr).includes(q))||(p.notes&&normalize(p.notes).includes(q))))
   ]:patients;
   animateCount('cnt', filtered.length);
   const lst=document.getElementById('lst');
