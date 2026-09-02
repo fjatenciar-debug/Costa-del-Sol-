@@ -130,9 +130,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" width="22" height="22"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
     </div>
     <div class="topbar-info">
-      <p>Direcciones verificadas por el equipo</p>
     </div>
-    <button class="btn-logout" onclick="openHelp()" title="Ayuda">❓ Ayuda</button>
+    <button class="btn-logout" onclick="openHelp()" title="Instrucciones de uso">Instrucciones</button>
     <button class="btn-logout" onclick="openPasswd()" id="btn-change-pass" style="display:none">Cambiar contraseña</button>
     <button class="btn-logout" onclick="doLogout()">Salir</button>
   </div>
@@ -233,10 +232,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
-<!-- MODAL AYUDA -->
+<!-- MODAL INSTRUCCIONES DE USO -->
 <div class="overlay" id="help-overlay">
   <div class="sheet">
-    <h3>❓ Ayuda</h3>
+    <h3>📋 Instrucciones de uso</h3>
     <div style="font-size:14px;color:#333;line-height:1.7">
       <p style="font-weight:600;color:#1D9E75;margin-bottom:8px">📍 Cómo añadir una dirección</p>
       <p>Al añadir un registro basta con rellenar <strong>una sola cosa</strong>: la dirección o las coordenadas GPS. No es necesario poner las dos.</p>
@@ -252,6 +251,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <li>Pulsa sobre ellos para copiarlos</li>
         <li>Pégalos directamente en el campo de coordenadas</li>
       </ol>
+      <br>
+      <p style="font-weight:600;color:#1D9E75;margin-bottom:8px">✏️ Editar un registro</p>
+      <p>Solo puedes editar un registro <strong>durante los 5 minutos</strong> posteriores a haberlo creado tú mismo. Pasado ese tiempo, o si el registro lo añadió otra persona, el botón de editar desaparecerá. Solo el administrador puede modificar cualquier registro sin límite de tiempo.</p>
       <br>
       <p style="font-size:12px;color:#aaa">💡 Tanto la dirección como las coordenadas se copian y pegan directamente desde Google Maps para evitar errores.</p>
     </div>
@@ -473,9 +475,9 @@ function renderRecientes(){
         ${p.createdAt?`<div style="font-size:10px;color:#bbb;margin-top:3px">${p.createdAt}${isAdmin&&p.addedBy?' · '+p.addedBy:''}</div>`:''}
       </div>
       <div class="btns">
-        <button class="btn-edit" onclick="openEdit('${p.id}')">
+        ${canEdit(p)?`<button class="btn-edit" onclick="openEdit('${p.id}')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
+        </button>`:''}
         ${isAdmin?`<button class="btn-del" onclick="deleteP('${p.id}')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
         </button>`:''}
@@ -489,6 +491,18 @@ function renderRecientes(){
 
 function normalize(s){
   return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+// ─── PERMISOS DE EDICIÓN ────────────────────────────────────────
+const EDIT_WINDOW_MS = 5*60*1000; // 5 minutos
+function canEdit(p){
+  if(isAdmin) return true;
+  if(!currentUser||!p) return false;
+  const owner = p.addedBy===currentUser.realname || p.addedBy===currentUser.username;
+  if(!owner) return false;
+  const created = parseInt(p.id); // el id es Date.now()
+  if(!created||isNaN(created)) return false;
+  return (Date.now()-created) < EDIT_WINDOW_MS;
 }
 
 window.render=function render(){
@@ -509,9 +523,9 @@ window.render=function render(){
         ${p.notes?`<div class="pnotes">${p.notes}</div>`:''}
         ${p.createdAt?`<div style="font-size:10px;color:#bbb;margin-top:3px">${p.createdAt}${isAdmin&&p.addedBy?' · '+p.addedBy:''}</div>`:''}      </div>
       <div class="btns">
-        <button class="btn-edit" onclick="openEdit('${p.id}')">
+        ${canEdit(p)?`<button class="btn-edit" onclick="openEdit('${p.id}')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
+        </button>`:''}
         ${isAdmin?`<button class="btn-del" onclick="deleteP('${p.id}')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
         </button>`:''}
@@ -550,6 +564,7 @@ window.addP=async function(){
 
 window.openEdit=function(patientId){
   const p=patients.find(x=>x.id===patientId);if(!p)return;
+  if(!canEdit(p)){showToast('❌ Ya no puedes editar este registro.');return;}
   editPatientId=patientId;
   document.getElementById('e-nm').value=p.name;document.getElementById('e-ad').value=p.addr||'';
   document.getElementById('e-gp').value=p.gps||'';document.getElementById('e-no').value=p.notes||'';
@@ -558,6 +573,8 @@ window.openEdit=function(patientId){
 };
 window.saveEdit=async function(){
   if(!editPatientId)return;
+  const orig=patients.find(x=>x.id===editPatientId);
+  if(!canEdit(orig)){showToast('❌ Ya no puedes editar este registro.');closeEdit();return;}
   showLoader('Guardando...');
   try{
     const p={id:editPatientId,name:document.getElementById('e-nm').value.trim(),addr:document.getElementById('e-ad').value.trim(),gps:document.getElementById('e-gp').value.trim(),notes:document.getElementById('e-no').value.trim(),addedBy:patients.find(x=>x.id===editPatientId)?.addedBy||''};
